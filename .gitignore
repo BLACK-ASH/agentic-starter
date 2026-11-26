@@ -1,0 +1,33 @@
+# Machine-specific / generated artifacts
+.venv/
+venv/
+env/
+.env
+.env.*
+!.env.example
+
+# Optional tool caches — examples only; prune patterns unrelated to your chosen stack
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Logs and local state
+*.log
+*.sqlite
+*.db
+.DS_Store
+Thumbs.db
+
+# Editor and tooling
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Scratch workspaces
+.superpowers/
+
+# Graphify generated output
+graphify-out/

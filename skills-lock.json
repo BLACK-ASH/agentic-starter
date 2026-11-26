@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "skills": {
+    "azure-enterprise-infra-planner": {
+      "source": "microsoft/azure-skills",
+      "commit": "7847020998043c6231929b364c35393b7cdab270",
+      "sourceType": "github",
+      "skillPath": "skills/azure-enterprise-infra-planner/SKILL.md",
+      "computedHash": "6505bed474173b9c1e211ab18be0fa58836c0aa35d16ed5e8c5afdd419c3317a"
+    }
+  }
+}

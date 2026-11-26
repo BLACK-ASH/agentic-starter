@@ -1,0 +1,32 @@
+# Generated graph output — never commit or graph the empty starter
+graphify-out/
+
+# Credentials and local environment files
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+id_rsa*
+id_dsa*
+credentials*.json
+secrets*
+
+# Dependency directories
+node_modules/
+vendor/
+.venv/
+venv/
+env/
+.pnpm-store/
+
+# Build outputs and caches
+dist/
+build/
+out/
+target/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/

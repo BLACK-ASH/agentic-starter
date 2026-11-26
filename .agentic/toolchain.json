@@ -1,0 +1,368 @@
+{
+  "schemaVersion": 1,
+  "description": "Repository-controlled source of truth for the prescribed agent toolchain.",
+  "platformPolicy": {
+    "primaryAgent": "opencode",
+    "supportedAgents": ["opencode"],
+    "supportedOs": ["linux"],
+    "verifiedOs": ["linux"],
+    "note": "Linux is the only verified platform; other agents and operating systems are reported as unsupported.",
+    "agentDetection": {
+      "envVars": ["AGENTIC_ACTIVE_AGENT", "AI_AGENT"],
+      "opencodeMarkers": ["OPENCODE", "OPENCODE_SESSION_ID"],
+      "fallback": "Assume opencode when no other agent is named and the OpenCode CLI is present."
+    }
+  },
+  "components": [
+    {
+      "id": "opencode",
+      "description": "Primary coding agent environment for the starter.",
+      "requirement": "required",
+      "version": {
+        "minimum": "2.2.5",
+        "verified": "2.4.1"
+      },
+      "source": {
+        "name": "OpenCode",
+        "url": "https://opencode.ai/docs/cli/",
+        "distribution": "official-installer"
+      },
+      "install": {
+        "method": "official-installer",
+        "command": "Follow https://opencode.ai/docs/cli/ for Linux; verify with `opencode --version`.",
+        "scope": "developer",
+        "elevation": "prompt"
+      },
+      "platforms": {
+        "agents": ["opencode"],
+        "os": ["linux"]
+      },
+      "prerequisites": ["Node.js on PATH for npm-based plugins"],
+      "verify": ["opencode --version"],
+      "dependencies": [],
+      "integration": {
+        "type": "agent",
+        "details": "Reads project AGENTS.md and OpenSpec artifacts; no project-level plugin declarations."
+      }
+    },
+    {
+      "id": "openspec",
+      "description": "Spec-driven workflow CLI used by every change.",
+      "requirement": "required",
+      "version": {
+        "exact": "2.1.1"
+      },
+      "source": {
+        "name": "OpenSpec CLI",
+        "url": "https://github.com/Fission-AI/OpenSpec",
+        "distribution": "npm:@fission-ai/openspec"
+      },
+      "install": {
+        "method": "npm-global",
+        "command": "npm install -g @fission-ai/openspec@2.1.1",
+        "scope": "global",
+        "elevation": "prompt"
+      },
+      "platforms": {
+        "agents": ["opencode"],
+        "os": ["linux"]
+      },
+      "prerequisites": ["Node.js >= 22.20.0", "npm"],
+      "verify": ["openspec --version", "openspec doctor --json"],
+      "dependencies": ["opencode"],
+      "integration": {
+        "type": "cli",
+        "details": "Uses the repository openspec/ directory and spec-driven schema."
+      }
+    },
+    {
+      "id": "openspec-skills",
+      "description": "Project-level OpenSpec skills committed under .agents/skills.",
+      "requirement": "required",
+      "version": {
+        "exact": "repo-local"
+      },
+      "source": {
+        "name": "Repository skills",
+        "url": "https://github.com/Fission-AI/OpenSpec",
+        "distribution": "repository"
+      },
+      "install": {
+        "method": "repository-checkout",
+        "command": "Clone the starter; no separate install command is required.",
+        "scope": "project",
+        "elevation": "never"
+      },
+      "platforms": {
+        "agents": ["opencode"],
+        "os": ["linux"]
+      },
+      "prerequisites": ["git"],
+      "verify": ["find .agents/skills -name SKILL.md -type f"],
+      "dependencies": ["openspec"],
+      "integration": {
+        "type": "project-skills",
+        "path": ".agents/skills",
+        "expected": [
+          "openspec-archive-change",
+          "openspec-apply-change",
+          "openspec-explore",
+          "openspec-propose",
+          "openspec-sync-specs",
+          "openspec-update-change",
+          "azure-enterprise-infra-planner"
+        ]
+      }
+    },
+    {
+      "id": "superpowers",
+      "description": "Superpowers skill and workflow package pinned to the reviewed commit.",
+      "requirement": "required",
+      "version": {
+        "exact": "22f0b463e7a5e579904dd6211a520321035526f7"
+      },
+      "source": {
+        "name": "Superpowers",
+        "url": "https://github.com/obra/superpowers",
+        "distribution": "git"
+      },
+      "install": {
+        "method": "opencode-plugin",
+        "command": "opencode plugin add superpowers@git+https://github.com/obra/superpowers.git#22f0b463e7a5e579904dd6211a520321035526f7",
+        "scope": "global",
+        "elevation": "never"
+      },
+      "platforms": {
+        "agents": ["opencode"],
+        "os": ["linux"]
+      },
+      "prerequisites": ["opencode", "Node.js", "npm", "git"],
+      "verify": ["opencode plugin list"],
+      "dependencies": ["opencode"],
+      "integration": {
+        "type": "global-plugin",
+        "details": "Reconciled from the manifest; never declared in project opencode.json."
+      }
+    },
+    {
+      "id": "graphify",
+      "description": "Optional-on-demand codebase graph CLI built from the official graphifyy distribution.",
+      "requirement": "required",
+      "version": {
+        "exact": "0.9.119"
+      },
+      "source": {
+        "name": "Graphify",
+        "url": "https://github.com/Graphify-Labs/graphify",
+        "distribution": "pypi:graphifyy"
+      },
+      "install": {
+        "method": "uv-or-pipx",
+        "command": "uv tool install \"graphifyy==0.9.119\" || pipx install \"graphifyy==0.9.119\"",
+        "scope": "developer",
+        "elevation": "prompt"
+      },
+      "platforms": {
+        "agents": ["opencode"],
+        "os": ["linux"]
+      },
+      "prerequisites": ["Python 3.11.5-3.14", "uv or pipx"],
+      "verify": ["graphify --version", "graphify --help"],
+      "dependencies": [],
+      "integration": {
+        "type": "cli",
+        "graphCommand": "/graphify .",
+        "queryCommand": "graphify query \"question\" --graph graphify-out/graph.json",
+        "avoid": "graphify opencode install",
+        "details": "CLI is required; the assistant skill is not vendored and the always-on integration is not run by the starter."
+      }
+    },
+    {
+      "id": "rtk",
+      "description": "Token-saving command filter with a global OpenCode integration.",
+      "requirement": "required",
+      "version": {
+        "exact": "v1.2.1"
+      },
+      "source": {
+        "name": "RTK",
+        "url": "https://github.com/rtk-ai/rtk",
+        "repository": "rtk-ai/rtk",
+        "distribution": "official-install-script"
+      },
+      "install": {
+        "method": "official-install-script",
+        "command": "curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/refs/heads/master/install.sh | RTK_VERSION=v1.2.1 sh",
+        "scope": "developer",
+        "elevation": "never"
+      },
+      "platforms": {
+        "agents": ["opencode"],
+        "os": ["linux"]
+      },
+      "prerequisites": ["curl", "tar", "sha256sum or shasum", "$HOME/.local/bin on PATH"],
+      "verify": ["rtk --version", "rtk gain", "rtk init --show"],
+      "dependencies": ["opencode"],
+      "integration": {
+        "type": "global-cli",
+        "statusCommand": "rtk init --show",
+        "configureCommand": "rtk init -g --opencode",
+        "details": "Check first; configure only when no working integration exists. Never commit global RTK state."
+      }
+    },
+    {
+      "id": "ponytail",
+      "description": "Brevity modes and review commands for AI agents.",
+      "requirement": "required",
+      "version": {
+        "exact": "5.3.3"
+      },
+      "source": {
+        "name": "Ponytail",
+        "url": "https://github.com/DietrichGebert/ponytail",
+        "distribution": "npm:@dietrichgebert/ponytail"
+      },
+      "install": {
+        "method": "opencode-plugin",
+        "command": "opencode plugin add @dietrichgebert/ponytail@5.3.3",
+        "scope": "global",
+        "elevation": "never"
+      },
+      "platforms": {
+        "agents": ["opencode"],
+        "os": ["linux"]
+      },
+      "prerequisites": ["opencode", "Node.js", "npm"],
+      "verify": ["opencode plugin list"],
+      "dependencies": ["opencode"],
+      "integration": {
+        "type": "global-plugin",
+        "commands": [
+          "/ponytail [lite|full|ultra|off]",
+          "/ponytail band [on|off]",
+          "/ponytail-review",
+          "/ponytail-audit"
+        ],
+        "details": "Brevity guidance never overrides OpenSpec requirements, acceptance criteria, architecture decisions, security, or quality gates."
+      }
+    },
+    {
+      "id": "dcp",
+      "description": "Dynamic context pruning plugin for OpenCode.",
+      "requirement": "required",
+      "version": {
+        "exact": "3.2.1"
+      },
+      "source": {
+        "name": "Dynamic Context Pruning",
+        "url": "https://github.com/Tarquinen/opencode-dynamic-context-pruning",
+        "distribution": "npm:@tarquinen/opencode-dcp"
+      },
+      "install": {
+        "method": "opencode-plugin",
+        "command": "opencode plugin add @tarquinen/opencode-dcp@3.2.1",
+        "scope": "global",
+        "elevation": "never"
+      },
+      "platforms": {
+        "agents": ["opencode"],
+        "os": ["linux"]
+      },
+      "prerequisites": ["opencode >= 2.2.5", "Node.js", "npm"],
+      "verify": ["opencode plugin list"],
+      "dependencies": ["opencode"],
+      "integration": {
+        "type": "global-plugin",
+        "details": "Verified peer dependency @opencode-ai/plugin >= 1.18.29 is compatible with OpenCode 2.2.5+."
+      }
+    },
+    {
+      "id": "context7",
+      "description": "Recommended documentation lookup integration.",
+      "requirement": "optional",
+      "version": {
+        "exact": "latest"
+      },
+      "source": {
+        "name": "Context7",
+        "url": "https://context7.com/",
+        "distribution": "mcp"
+      },
+      "install": {
+        "method": "agent-specific",
+        "command": "Follow the provider's official MCP setup instructions.",
+        "scope": "developer",
+        "elevation": "never"
+      },
+      "platforms": {
+        "agents": ["opencode"],
+        "os": ["linux"]
+      },
+      "prerequisites": ["MCP-capable agent"],
+      "verify": ["Confirm the integration appears in the agent's MCP list."],
+      "dependencies": ["opencode"],
+      "integration": {
+        "type": "recommendation",
+        "details": "Not required for readiness."
+      }
+    },
+    {
+      "id": "playwright",
+      "description": "Recommended browser automation integration.",
+      "requirement": "optional",
+      "version": {
+        "exact": "latest"
+      },
+      "source": {
+        "name": "Playwright",
+        "url": "https://playwright.dev/",
+        "distribution": "npm"
+      },
+      "install": {
+        "method": "project-specific",
+        "command": "Install only when a project needs browser automation.",
+        "scope": "project",
+        "elevation": "prompt"
+      },
+      "platforms": {
+        "agents": ["opencode"],
+        "os": ["linux"]
+      },
+      "prerequisites": ["Node.js"],
+      "verify": ["Run the project's browser test command."],
+      "dependencies": [],
+      "integration": {
+        "type": "recommendation",
+        "details": "Not required for readiness."
+      }
+    }
+  ],
+  "globalPlugins": [
+    {
+      "id": "superpowers",
+      "identity": "superpowers",
+      "listId": "superpowers",
+      "package": "superpowers@git+https://github.com/obra/superpowers.git#22f0b463e7a5e579904dd6211a520321035526f7",
+      "expectedVersion": "22f0b463e7a5e579904dd6211a520321035526f7",
+      "officialSource": "https://github.com/obra/superpowers"
+    },
+    {
+      "id": "ponytail",
+      "identity": "@dietrichgebert/ponytail",
+      "listId": "ponytail",
+      "package": "@dietrichgebert/ponytail@5.3.3",
+      "expectedVersion": "5.3.3",
+      "officialSource": "https://www.npmjs.com/package/@dietrichgebert/ponytail"
+    },
+    {
+      "id": "dcp",
+      "identity": "@tarquinen/opencode-dcp",
+      "listId": "opencode-dcp",
+      "package": "@tarquinen/opencode-dcp@3.2.1",
+      "expectedVersion": "3.2.1",
+      "officialSource": "https://www.npmjs.com/package/@tarquinen/opencode-dcp"
+    }
+  ],
+  "projectPlugins": [],
+  "recommendedIntegrations": ["context7", "playwright"]
+}

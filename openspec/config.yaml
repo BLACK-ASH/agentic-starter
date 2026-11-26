@@ -1,0 +1,53 @@
+schema: spec-driven
+
+# Project context: constraints an agent cannot infer from an empty starter.
+# No technology stack, framework, runtime, package manager, architecture, or
+# sample application is assumed. Each new project establishes its own stack.
+context: |
+  This repository is a reusable, stack-agnostic starter for AI-assisted,
+  multi-developer software work. Do not assume any technology stack or
+  architecture. Shared instructions live in AGENTS.md and CONTRIBUTING.md;
+  follow them before proposing or implementing work. Record chosen stack
+  decisions explicitly in a change before application work begins.
+
+# Per-artifact rules: constraints for authors of OpenSpec artifacts.
+rules:
+  proposal:
+    - State the problem, the outcome, and the non-goals in observable terms.
+    - Define clear acceptance criteria and make scope boundaries explicit.
+    - Identify the capabilities affected and any external contracts involved.
+    - Name affected files or modules at a high level when they are known.
+  specs:
+    - Every requirement SHALL be testable and use SHALL or MUST.
+    - Include explicit acceptance criteria or scenarios for each requirement.
+    - Define API contracts, including errors and compatibility, before parallel implementation of dependent components.
+    - Describe external constraints and integration responsibilities without naming implementation internals.
+  design:
+    - Record architecture and design decisions with rationale and alternatives considered.
+    - Identify dependencies between components, tasks, and external systems.
+    - State which files or modules are likely affected and where ownership boundaries sit.
+    - Describe how shared files and contract changes will be handled.
+  tasks:
+    - Every task MUST name one responsible developer or agent as owner, recorded by a specific name or agent identifier rather than an unassigned role.
+    - Every task MUST declare its dependencies and any blocking decisions.
+    - Every task MUST list the affected files or modules it may change.
+    - Every task MUST define verification criteria with an observable result.
+    - Every task MUST define testing and review requirements before it can be marked complete.
+    - Testing and review MUST be completed with recorded evidence before a task is marked done.
+    - Validation requirements MUST be satisfied before the change is archived.
+
+# Advisory guidance for operations; these do not replace workflow rules.
+operations:
+  apply:
+    guidance:
+      - Confirm the task owner, dependencies, affected files, and verification criteria before starting each task.
+      - Write and run tests first when code changes; never fabricate implementation or test results.
+      - Keep edits inside the current project directory except for /tmp scratch space.
+      - Record the command and observed result for every verification step.
+      - Require review and a green full validation run before marking implementation complete.
+  archive:
+    guidance:
+      - Confirm all tasks are complete with evidence and review findings resolved before archiving.
+      - Run OpenSpec validation and the project's full validation or test suite before archiving.
+      - Verify documentation is consistent with the delivered change.
+      - Confirm the feature branch was validated and merged into dev before archiving.
